@@ -29,12 +29,13 @@ sed -i '/default_bits/   s:=.*:= 4096:'                    ${PKI_CNF} ## default
 rm -rfv ${NAME}-nec.cfg
 cp -rfv nec.cfg ${NAME}-nec.cfg
 sed -i 's/NAME-server/'${NAME}'-server/g' ${NAME}-nec.cfg
-sed -i 's/NAME-client/'${NAME}'-server/g' ${NAME}-nec.cfg
+sed -i 's/NAME-client/'${NAME}'-client/g' ${NAME}-nec.cfg
 
 cat ${NAME}-nec.cfg >> ${PKI_CNF}
 
 echo "###############################################################################"
 echo "Gen Server File"
+echo "###############################################################################"
 CA_KEY=${PKI_DIR}/newcerts/ca.key
 CA_CRT=${PKI_DIR}/newcerts/ca.crt
 SERVER_KEY=${PKI_DIR}/newcerts/${NAME}-server.key
@@ -53,4 +54,13 @@ openssl ca  -batch -keyfile "${CA_KEY}" -cert "${CA_CRT}" -in "${SERVER_CSR}" -o
 #openssl req -batch -nodes -new -keyout "ca.key" -out "ca.crt" -x509 -config ${PKI_CNF}  ## x509 (self-signed) for the CA
 #openssl req -batch -nodes -new -keyout "my-server.key" -out "my-server.csr" -subj "/CN=my-server" -config ${PKI_CNF}
 #openssl ca  -batch -keyfile "ca.key" -cert "ca.crt" -in "my-server.csr" -out "my-server.crt" -config ${PKI_CNF} -extensions my-server
+
+echo "###############################################################################"
+echo "Gen Client File"
+echo "###############################################################################"
+CLIENT_KEY=${PKI_DIR}/newcerts/${NAME}-client.key
+CLIENT_CSR=${PKI_DIR}/newcerts/${NAME}-client.csr
+CLIENT_CRT=${PKI_DIR}/newcerts/${NAME}-client.crt
+openssl req -batch -nodes -new -keyout "${CLIENT_KEY}" -out "${CLIENT_CSR}" -subj "/CN=${NAME}-client" -config ${PKI_CNF}
+openssl ca  -batch -keyfile "${CA_KEY}" -cert "${CA_CRT}" -in "${CLIENT_CSR}" -out "${CLIENT_CRT}" -config ${PKI_CNF} -extensions ${NAME}-client
 
